@@ -3,3 +3,31 @@ body {
   padding: 0;
   font-family: sans-serif;
 }
+
+hr {
+  margin: 0;
+}
+
+.command {
+  margin: 0
+}
+
+.header {
+  font-weight: bold;
+}
+
+.sub {
+  padding-left: 10px;
+}
+
+.group {
+  border: 1px dashed gray;
+}
+
+.mTop {
+  margin-top: 10px;
+}
+
+.fSm {
+  font-size: small;
+}

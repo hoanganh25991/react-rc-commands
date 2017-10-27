@@ -5,7 +5,13 @@ import * as firebase from 'firebase';
 
 
 const subCateElm = (cate, goToSubCate) => (cate ? <div onClick={goToSubCate(cate)}>{cate.title} ({cate.count})</div> : <div/>)
-const lastCateElm = (lastCate) => subCateElm(lastCate, ()=>{})
+const lastCateElm = (lastCate) => (<b>{subCateElm(lastCate, ()=>{})}</b>)
+const showPathCommandCates = commandPath => {
+  const rightPath = Object.keys(commandPath).sort((aKey, bKey) => commandPath[aKey] > commandPath[bKey])
+  return (
+    <div>Category {rightPath.join("/")}</div>
+  )
+}
 
 class App extends Component {
 
@@ -13,14 +19,16 @@ class App extends Component {
     super(props)
     const setState = this.setState.bind(this)
     this.setState = (args) => {
-      this.push(this.state)
-      setState(args)
+      setState(args, () => {
+        this.push(this.state)
+      })
     }
 
     this.state = {
-      level: 0,
+      level: -1,
       lastCate: null,
-      currCates: []
+      currCates: [],
+      pathCommandCates: []
     }
   }
 
@@ -53,19 +61,43 @@ class App extends Component {
     })
   }
 
+  nextPathCates = cate => {
+    const {pathCommandCates: curr} = this.state
+    const remain = curr.filter(_cate => _cate.level < cate.level)
+    return [...remain, cate]
+  }
 
   goToSubCate = (cate) => () => {
     const {level, sub = []} = cate
-    this.setState({level, currCates: sub, lastCate: cate})
+    const pathCommandCates = this.nextPathCates(cate)
+    this.setState({level, currCates: sub, lastCate: cate, pathCommandCates})
   }
 
   showHistory = () => {
     console.log(this.stateHistory)
   }
 
+  goBack = () => {
+    this.stateHistory.pop()
+    const lastState = this.stateHistory.pop()
+    this.setState(lastState)
+  }
+
+
+  filter = () => {
+    const firebaseKey = str => str.replace(/[.#$/[\]]/, "")
+    const {pathCommandCates, commands} = this.state
+
+    if(pathCommandCates.length === 0)
+      return []
+
+    const commandHasPath = value => typeof value !== "undefined"
+    return commands.filter(command => pathCommandCates.reduce((carry, cate) => carry && commandHasPath(command.path[firebaseKey(cate.title)]), true))
+  }
+
 
   render() {
-    const {categories, commands} = this.state
+    const {categories} = this.state
 
     if(!categories)
       return (
@@ -78,26 +110,44 @@ class App extends Component {
       );
 
     const {level, currCates, lastCate} = this.state
+    const matchCommands = this.filter()
 
     return (
       <div>
         <div>
-          <h4>Categories</h4>
+          <button onClick={this.goBack}>Go back</button>
+        </div>
+        <div className={"mTop"}>
+          <div className={"header"}>Categories</div>
           <hr/>
-          <div>{lastCateElm(lastCate)}</div>
           <div>
-            {currCates.length > 0 && currCates.map((cate, index) => (
-              <div key={index}>{subCateElm(cate, this.goToSubCate)}
-                {level > 0 && cate.sub.map((cate, index) => (
-                  <div key={index}>{subCateElm(cate, this.goToSubCate)}</div>
-                ))}
-              </div>
-            ))}
+            <div>{lastCateElm(lastCate)}</div>
+            <div className={level > -1 ? "sub" : ""}>
+              {currCates.length > 0 && currCates.map((cate, index) => (
+                <div key={index}>{subCateElm(cate, this.goToSubCate)}
+                  {level > -1 && cate.sub && cate.sub.map((cate, index) => (
+                    <div className={"sub"} key={index}>{subCateElm(cate, this.goToSubCate)}</div>
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div>
-          <div>{commands.length}</div>
+        <div className={"mTop"}>
+          <div className={"header"}>Commands</div>
+          <hr/>
+          <div>Match {matchCommands.length} commands</div>
+          <div>
+            {matchCommands.map((command, index) => (
+              <div className={"group fSm"} key={index}>
+                <div>{command.title}</div>
+                <pre className={"command"}>{command.command}</pre>
+                <div>Notes: {command.notes}</div>
+                {showPathCommandCates(command.path)}
+              </div>
+            ))}
+          </div>
         </div>
         <div onClick={this.showHistory}>Show</div>
       </div>
