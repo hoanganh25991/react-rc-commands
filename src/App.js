@@ -4,18 +4,37 @@ import './App.css';
 import * as firebase from 'firebase';
 
 
-const subCate = (cate, goToSubCate) => (<span onClick={goToSubCate(cate)}>{cate.title} ({cate.count})</span>)
+const subCateElm = (cate, goToSubCate) => (cate ? <div onClick={goToSubCate(cate)}>{cate.title} ({cate.count})</div> : <div/>)
+const lastCateElm = (lastCate) => subCateElm(lastCate, ()=>{})
 
 class App extends Component {
 
   constructor(props){
     super(props)
+    const setState = this.setState.bind(this)
+    this.setState = (args) => {
+      this.push(this.state)
+      setState(args)
+    }
+
     this.state = {
       level: 0,
+      lastCate: null,
       currCates: []
     }
   }
 
+  stateHistory = []
+
+  push = state => {
+    const currLength = this.stateHistory.length
+
+    if(currLength > 5){
+      this.stateHistory.splice(0,1)
+    }
+
+    this.stateHistory.push(state)
+  }
 
   componentDidMount(){
     const app = firebase.initializeApp({
@@ -36,8 +55,12 @@ class App extends Component {
 
 
   goToSubCate = (cate) => () => {
-    const {level, sub} = cate
-    this.setState({level, currCates: sub})
+    const {level, sub = []} = cate
+    this.setState({level, currCates: sub, lastCate: cate})
+  }
+
+  showHistory = () => {
+    console.log(this.stateHistory)
   }
 
 
@@ -54,19 +77,29 @@ class App extends Component {
         </div>
       );
 
-    const {level, currCates} = this.state
+    const {level, currCates, lastCate} = this.state
 
     return (
       <div>
-        <h1>Categories</h1>
-        {currCates.map((cate, index) => (
-          <ul key={index}>{subCate(cate, this.goToSubCate)}
-            {level > 0 && cate.sub.map((cate, index) => (
-              <li key={index}>{subCate(cate, this.goToSubCate)}</li>
+        <div>
+          <h4>Categories</h4>
+          <hr/>
+          <div>{lastCateElm(lastCate)}</div>
+          <div>
+            {currCates.length > 0 && currCates.map((cate, index) => (
+              <div key={index}>{subCateElm(cate, this.goToSubCate)}
+                {level > 0 && cate.sub.map((cate, index) => (
+                  <div key={index}>{subCateElm(cate, this.goToSubCate)}</div>
+                ))}
+              </div>
             ))}
-          </ul>
-        ))}
-        <div>{commands.length}</div>
+          </div>
+        </div>
+
+        <div>
+          <div>{commands.length}</div>
+        </div>
+        <div onClick={this.showHistory}>Show</div>
       </div>
     )
   }
