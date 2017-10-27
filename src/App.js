@@ -6,12 +6,20 @@ import * as firebase from 'firebase';
 
 const subCateElm = (cate, goToSubCate) => (cate ? <div onClick={goToSubCate(cate)}>{cate.title} ({cate.count})</div> : <div/>)
 const lastCateElm = (lastCate) => (<b>{subCateElm(lastCate, ()=>{})}</b>)
-const showPathCommandCates = commandPath => {
+const showCommandPathCatesElm = commandPath => {
   const rightPath = Object.keys(commandPath).sort((aKey, bKey) => commandPath[aKey] > commandPath[bKey])
   return (
     <div>Category {rightPath.join("/")}</div>
   )
 }
+const showCommandElm = command => (
+  <div className={"group fSm"}>
+    <div>{command.title}</div>
+    <pre className={"command"}>{command.command}</pre>
+    <div>Notes: {command.notes}</div>
+    {showCommandPathCatesElm(command.path)}
+  </div>
+)
 
 class App extends Component {
 
@@ -28,7 +36,9 @@ class App extends Component {
       level: -1,
       lastCate: null,
       currCates: [],
-      pathCommandCates: []
+      pathCommandCates: [],
+      commandsMatchSearch: [],
+      isSearching: false
     }
   }
 
@@ -84,7 +94,7 @@ class App extends Component {
   }
 
 
-  filter = () => {
+  filterCommandsByCate = () => {
     const firebaseKey = str => str.replace(/[.#$/[\]]/, "")
     const {pathCommandCates, commands} = this.state
 
@@ -93,6 +103,22 @@ class App extends Component {
 
     const commandHasPath = value => typeof value !== "undefined"
     return commands.filter(command => pathCommandCates.reduce((carry, cate) => carry && commandHasPath(command.path[firebaseKey(cate.title)]), true))
+  }
+
+  filterCommandByTitle = search => {
+    const {commands} = this.state
+    return commands.filter(command => command.title.toLowerCase().includes(search.toLowerCase()))
+  }
+
+  search = ({target: {value}}) => {
+    // console.log(value)
+    const shouldSearch = value !== "" && value.length > 3
+    this.setState({isSearching: shouldSearch})
+
+    setTimeout(() => {
+      const commandsMatchSearch = shouldSearch ? this.filterCommandByTitle(value) : []
+      this.setState({commandsMatchSearch})
+    }, 0)
   }
 
 
@@ -110,13 +136,23 @@ class App extends Component {
       );
 
     const {level, currCates, lastCate} = this.state
-    const matchCommands = this.filter()
+    const {commandsMatchSearch, isSearching} = this.state
+    const commandsMatchCates = this.filterCommandsByCate()
 
     return (
       <div>
         <div>
           <button onClick={this.goBack}>Go back</button>
         </div>
+        <div className={"mTop"}>
+          <div className={"header"}>Search commands</div>
+          <input onChange={this.search} />
+          <div>
+            {isSearching && commandsMatchSearch.length === 0 ? "No command found" : null}
+            {commandsMatchSearch.map((command, index) => <div key={index}>{showCommandElm(command)}</div>)}
+          </div>
+        </div>
+
         <div className={"mTop"}>
           <div className={"header"}>Categories</div>
           <hr/>
@@ -137,19 +173,16 @@ class App extends Component {
         <div className={"mTop"}>
           <div className={"header"}>Commands</div>
           <hr/>
-          <div>Match {matchCommands.length} commands</div>
+          <div>Match {commandsMatchCates.length} commands</div>
           <div>
-            {matchCommands.map((command, index) => (
-              <div className={"group fSm"} key={index}>
-                <div>{command.title}</div>
-                <pre className={"command"}>{command.command}</pre>
-                <div>Notes: {command.notes}</div>
-                {showPathCommandCates(command.path)}
-              </div>
-            ))}
+            {commandsMatchCates.map((command, index) => <div key={index}>{showCommandElm(command)}</div>)}
           </div>
         </div>
-        <div onClick={this.showHistory}>Show</div>
+
+        <div className={"mTop"}>
+          <div className={"header"}>Settings</div>
+          <button onClick={this.showHistory}>Log state history</button>
+        </div>
       </div>
     )
   }
