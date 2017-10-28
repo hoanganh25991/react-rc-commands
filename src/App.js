@@ -9,14 +9,14 @@ const lastCateElm = (lastCate) => (<b>{subCateElm(lastCate, ()=>{})}</b>)
 const showCommandPathCatesElm = commandPath => {
   const rightPath = Object.keys(commandPath).sort((aKey, bKey) => commandPath[aKey] > commandPath[bKey])
   return (
-    <div>Category {rightPath.join("/")}</div>
+    <div><span className={"header"}>cates: </span>{rightPath.join("/")}</div>
   )
 }
 const showCommandElm = command => (
   <div className={"group fSm"}>
-    <div>{command.title}</div>
+    <div><span className={"header"}>title: </span>{command.title}</div>
     <pre className={"command"}>{command.command}</pre>
-    <div>Notes: {command.notes}</div>
+    <div><span className={"header"}>note: </span>{command.notes}</div>
     {showCommandPathCatesElm(command.path)}
   </div>
 )

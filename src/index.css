@@ -22,6 +22,7 @@ hr {
 
 .group {
   border: 1px dashed gray;
+  padding: 5px;
 }
 
 .mTop {
