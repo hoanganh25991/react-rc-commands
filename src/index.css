@@ -84,6 +84,13 @@ hr {
   overflow-y: auto;
   overflow-x: hidden;
   background-color: #424242;
-  color: white;
+  /*color: #F5F5F5;*/
+  color: #BDBDBD;
+}
+
+.loadingState{
+  border: 3px solid #424242;
+  background-color: #616161;
+  color: #BDBDBD;
 }
 
