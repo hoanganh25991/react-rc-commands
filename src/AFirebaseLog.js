@@ -64,7 +64,7 @@ class FirebaseLog extends React.PureComponent {
     if(this.state.done === true) {
       this.completePercenInterval && clearInterval(this.completePercenInterval)
       this.completePercenInterval = null
-      this.setState({completePercent: 1})
+      // this.setState({completePercent: 1})
     }
   }
 
