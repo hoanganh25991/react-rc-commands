@@ -78,9 +78,14 @@ hr {
   border-bottom: 1px solid gray;
 }
 
-.log {
+.logContainer{
   max-height: 500px;
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+.log{
+  background-color: #424242;
+  color: white;
 }
 

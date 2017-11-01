@@ -9,7 +9,9 @@ class FirebaseLog extends React.PureComponent {
       totalCommands: null,
       lastCrawlingTime: null,
       logs: [],
-      logMaxLength: 200, // Should in even for easy cut half
+      logMaxLength: 80,
+      mainBranch: "tmp",
+      logsBranch: "logMsgs"
     }
   }
 
@@ -23,16 +25,18 @@ class FirebaseLog extends React.PureComponent {
     this.fbApp = app
 
     const db = app.database()
-    const nodeRcRef = db.ref("tmp/logs")
+    const {mainBranch, logsBranch} = this.state
+    const nodeRcRef = db.ref(`${mainBranch}/${logsBranch}`)
     nodeRcRef.on("child_added", snapshot => {
+      const logMsgKey = snapshot.key
       const logMsg = snapshot.val()
-      console.log(logMsg)
+      // console.log(logMsgKey, logMsg)
       const {logs, logMaxLength} = this.state
       const overThreshold = logs.length > logMaxLength
       const slicePos = overThreshold ? Math.floor(logMaxLength/2) : 0
       const nextLogs = logs.slice(slicePos)
-      nextLogs.push(logMsg)
-      // this.setState({logs: nextLogs})
+      nextLogs.push({key: logMsgKey, msg: logMsg})
+      this.setState({logs: nextLogs})
     })
   }
 
@@ -41,15 +45,15 @@ class FirebaseLog extends React.PureComponent {
     if(this.fbApp) this.fbApp.delete().then(() => console.log("Firebase app deleted"))
   }
 
-
   scrollToBottom = node => {
     if(!node) return
-    console.log("Bind scroll to bottom")
-    node.addEventListener("resize", () => {
-      node.scrollTo(0, node.innerHeight)
+    const logContainer = node.parentNode
+    node.addEventListener("DOMNodeInserted", () => {
+      const {height} = node.getBoundingClientRect()
+      console.log("See log, srolling...", node, height)
+      logContainer.scrollTo(0, height)
     })
   }
-
 
   render(){
     const {totalCategories, totalCommands, lastCrawlingTime, logs} = this.state
@@ -59,9 +63,11 @@ class FirebaseLog extends React.PureComponent {
         <div>Categories found: {totalCategories || "-"}</div>
         <div>Commands found: {totalCommands || "-" }</div>
         <div>Last crawling time: {lastCrawlingTime || "-" }s</div>
-        <div className={"group fSm"} ref={this.scrollToBottom}>
-          {!logs.length && "No log found"}
-          {logs.map(log => (<div>{log}</div>))}
+        <div className={"logContainer"}>
+          <div className={"group fSm log"} ref={this.scrollToBottom}>
+            {!logs.length && "No log found"}
+            {logs.map(log => (<div key={log.key}>{log.msg}</div>))}
+          </div>
         </div>
       </div>
     )
