@@ -1,5 +1,6 @@
 import React from 'react';
 import * as firebase from "firebase"
+import Section from "./ASection"
 
 class FirebaseLog extends React.PureComponent {
   constructor(props){
@@ -63,12 +64,14 @@ class FirebaseLog extends React.PureComponent {
         <div>Categories found: {totalCategories || "-"}</div>
         <div>Commands found: {totalCommands || "-" }</div>
         <div>Last crawling time: {lastCrawlingTime || "-" }s</div>
-        <div className={"logContainer"}>
-          <div className={"group fSm log"} ref={this.scrollToBottom}>
-            {!logs.length && "No log found"}
-            {logs.map(log => (<div key={log.key}>{log.msg}</div>))}
+        <Section>
+          <div className={"logContainer group fSm"}>
+            <div ref={this.scrollToBottom}>
+              {!logs.length && "No log found"}
+              {logs.map(log => (<div key={log.key}>{log.msg}</div>))}
+            </div>
           </div>
-        </div>
+        </Section>
       </div>
     )
   }
