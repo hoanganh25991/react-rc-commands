@@ -8,6 +8,38 @@ hr {
   margin: 0;
 }
 
+/* Default app style */
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  animation: App-logo-spin infinite 20s linear;
+  height: 80px;
+}
+
+.App-header {
+  background-color: #222;
+  height: 150px;
+  padding: 20px;
+  color: white;
+}
+
+.App-title {
+  font-size: 1.5em;
+}
+
+.App-intro {
+  font-size: large;
+}
+
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+
+/* Custom style */
 .command {
   margin: 0
 }
@@ -32,3 +64,23 @@ hr {
 .fSm {
   font-size: small;
 }
+
+.flex {
+  display: flex; /* or inline-flex */
+  flex-direction: row;
+}
+
+.flex1{
+  flex: 1;
+}
+
+.underline{
+  border-bottom: 1px solid gray;
+}
+
+.log {
+  max-height: 500px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+

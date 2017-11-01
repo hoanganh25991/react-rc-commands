@@ -1,9 +1,16 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
-import './App.css';
+// import './App.css';
 import * as firebase from 'firebase';
+import FirebaseLog from "./AFirebaseLog"
+import Section from "./ASection"
 
-
+/**
+ * SubCateElm as func component
+ * Show sub cate of cate
+ * @param cate
+ * @param goToSubCate
+ */
 const subCateElm = (cate, goToSubCate) => (cate ? <div onClick={goToSubCate(cate)}>{cate.title} ({cate.count})</div> : <div/>)
 const lastCateElm = (lastCate) => (<b>{subCateElm(lastCate, ()=>{})}</b>)
 const showCommandPathCatesElm = commandPath => {
@@ -21,6 +28,10 @@ const showCommandElm = command => (
   </div>
 )
 
+
+/**
+ * Main App code
+ */
 class App extends Component {
 
   constructor(props){
@@ -144,44 +155,53 @@ class App extends Component {
         <div>
           <button onClick={this.goBack}>Go back</button>
         </div>
+
         <div className={"mTop"}>
-          <div className={"header"}>Search commands</div>
-          <input onChange={this.search} />
-          <div>
-            {isSearching && commandsMatchSearch.length === 0 ? "No command found" : null}
-            {commandsMatchSearch.map((command, index) => <div key={index}>{showCommandElm(command)}</div>)}
-          </div>
+          <Section title={"Logs"}>
+            <FirebaseLog />
+          </Section>
         </div>
 
         <div className={"mTop"}>
-          <div className={"header"}>Categories</div>
-          <hr/>
-          <div>
-            <div>{lastCateElm(lastCate)}</div>
-            <div className={level > -1 ? "sub" : ""}>
-              {currCates.length > 0 && currCates.map((cate, index) => (
-                <div key={index}>{subCateElm(cate, this.goToSubCate)}
-                  {level > -1 && cate.sub && cate.sub.map((cate, index) => (
-                    <div className={"sub"} key={index}>{subCateElm(cate, this.goToSubCate)}</div>
-                  ))}
-                </div>
-              ))}
+          <Section title={"Search commands"}>
+            <input onChange={this.search} />
+            <div>
+              {isSearching && commandsMatchSearch.length === 0 ? "No command found" : null}
+              {commandsMatchSearch.map((command, index) => <div key={index}>{showCommandElm(command)}</div>)}
             </div>
-          </div>
+          </Section>
         </div>
 
         <div className={"mTop"}>
-          <div className={"header"}>Commands</div>
-          <hr/>
-          <div>Match {commandsMatchCates.length} commands</div>
-          <div>
-            {commandsMatchCates.map((command, index) => <div key={index}>{showCommandElm(command)}</div>)}
-          </div>
+          <Section title={"Categories"}>
+            <div>
+              <div>{lastCateElm(lastCate)}</div>
+              <div className={level > -1 ? "sub" : ""}>
+                {currCates.length > 0 && currCates.map((cate, index) => (
+                  <div key={index}>{subCateElm(cate, this.goToSubCate)}
+                    {level > -1 && cate.sub && cate.sub.map((cate, index) => (
+                      <div className={"sub"} key={index}>{subCateElm(cate, this.goToSubCate)}</div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Section>
         </div>
 
         <div className={"mTop"}>
-          <div className={"header"}>Settings</div>
-          <button onClick={this.showHistory}>Log state history</button>
+          <Section title={"Commands"}>
+            <div>Match {commandsMatchCates.length} commands</div>
+            <div>
+              {commandsMatchCates.map((command, index) => <div key={index}>{showCommandElm(command)}</div>)}
+            </div>
+          </Section>
+        </div>
+
+        <div className={"mTop"}>
+          <Section visible={false} title={"Settings"}>
+            <button onClick={this.showHistory}>Log state history</button>
+          </Section>
         </div>
       </div>
     )
